@@ -22,8 +22,28 @@ export class KeywordRepository implements KeywordRepositoryInterface {
             .getMany();
 
         return result.map<KeywordDomain>((keyword) =>
-            KeywordDomain.fromTypeORMWithoutUsers(keyword)
+            KeywordDomain.fromTypeORM(keyword)
         );
+    }
+
+    public async getKeywordsByUserIdAndSource(
+        userId: string,
+        cameFrom: USER_CAME_FROM
+    ): Promise<KeywordDomain[]> {
+        try {
+            const result = await this.keywordRepositoryTypeORM
+                .createQueryBuilder('keywords')
+                .leftJoinAndSelect('users.keywords', 'keywords')
+                .where('users.userId = :userId', { userId })
+                .andWhere('users.cameFrom = :cameFrom', { cameFrom })
+                .getMany();
+
+            return result.map<KeywordDomain>((res) =>
+                KeywordDomain.fromTypeORM(res)
+            );
+        } catch (e) {
+            throw e;
+        }
     }
 
     public async insertKeywordsWithUserId(

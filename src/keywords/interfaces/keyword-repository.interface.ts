@@ -10,4 +10,8 @@ export interface KeywordRepositoryInterface {
         cameFrom: USER_CAME_FROM
     ): Promise<KeywordDomain[]>;
     getAllKeywords(): Promise<KeywordDomain[]>;
+    getKeywordsByUserIdAndSource(
+        userId: string,
+        cameFrom: USER_CAME_FROM
+    ): Promise<KeywordDomain[]>;
 }

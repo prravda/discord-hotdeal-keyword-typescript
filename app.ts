@@ -1,5 +1,4 @@
 import 'reflect-metadata';
-// TODO: validate environmental variables
 import 'dotenv/config';
 import { AppDataSource } from './infra/database/app-datasource';
 
