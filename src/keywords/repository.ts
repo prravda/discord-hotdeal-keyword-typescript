@@ -17,13 +17,17 @@ export class KeywordRepository implements KeywordRepositoryInterface {
     }
 
     public async getAllKeywords(): Promise<KeywordDomain[]> {
-        const result = await this.keywordRepositoryTypeORM
-            .createQueryBuilder('keywords')
-            .getMany();
+        try {
+            const result = await this.keywordRepositoryTypeORM
+                .createQueryBuilder('keywords')
+                .getMany();
 
-        return result.map<KeywordDomain>((keyword) =>
-            KeywordDomain.fromTypeORM(keyword)
-        );
+            return result.map<KeywordDomain>((keyword) =>
+                KeywordDomain.fromTypeORMWithoutUser(keyword)
+            );
+        } catch (e) {
+            throw e;
+        }
     }
 
     public async getKeywordsByUserIdAndSource(
@@ -33,7 +37,7 @@ export class KeywordRepository implements KeywordRepositoryInterface {
         try {
             const result = await this.keywordRepositoryTypeORM
                 .createQueryBuilder('keywords')
-                .leftJoinAndSelect('users.keywords', 'keywords')
+                .leftJoinAndSelect('keywords.users', 'users')
                 .where('users.userId = :userId', { userId })
                 .andWhere('users.cameFrom = :cameFrom', { cameFrom })
                 .getMany();

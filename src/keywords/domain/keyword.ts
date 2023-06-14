@@ -35,4 +35,15 @@ export class KeywordDomain {
             )
         );
     }
+
+    public static fromTypeORMWithoutUser(
+        keywordTypeOrmEntity: Keyword
+    ): KeywordDomain {
+        return new KeywordDomain(
+            keywordTypeOrmEntity.id,
+            keywordTypeOrmEntity.keyword,
+            keywordTypeOrmEntity.keywordHash,
+            (keywordTypeOrmEntity.users = [])
+        );
+    }
 }
