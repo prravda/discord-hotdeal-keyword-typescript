@@ -19,7 +19,7 @@ services:
   database-postgres:
     hostname: database-postgres
     container_name: database-postgres
-    image: postgres:15.3
+    image: postgres:15.3-alpine
     ports:
       - "5432:5432"
     environment:
