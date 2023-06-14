@@ -1,4 +1,6 @@
 import { DataSource } from 'typeorm';
+import { User } from '../../src/users/entity';
+import { Keyword } from '../../src/keywords/entity';
 
 export class AppDataSource {
     private static appDataSource: DataSource;
@@ -14,7 +16,9 @@ export class AppDataSource {
                     password: process.env.DATABASE_PASSWORD,
                     database: process.env.DATABASE_NAME,
                     synchronize: true,
-                    entities: [],
+                    entities: [User, Keyword],
+                    poolSize: 10,
+                    connectTimeoutMS: 250,
                 });
             }
             return this.appDataSource;
