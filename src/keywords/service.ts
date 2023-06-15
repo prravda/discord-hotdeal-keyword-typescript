@@ -6,6 +6,20 @@ export class KeywordService {
         private readonly keywordRepository: KeywordRepositoryInterface
     ) {}
 
+    public async getKeywordByUserIdAndSource(
+        userId: string,
+        source: USER_CAME_FROM
+    ) {
+        try {
+            return await this.keywordRepository.getKeywordsByUserIdAndSource(
+                userId,
+                source
+            );
+        } catch (e) {
+            throw e;
+        }
+    }
+
     public async getAllKeywordsAndUsers() {
         try {
             return await this.keywordRepository.getAllKeywordsAndUsers();
@@ -19,6 +33,7 @@ export class KeywordService {
         keywords: string[],
         cameFrom: USER_CAME_FROM
     ) {
+        // TODO: When user input same keywords (ex. 문화상품권, 문화상품권), reject and send an error as an response
         try {
             const keywordsOfUser =
                 await this.keywordRepository.getKeywordsByUserIdAndSource(
@@ -26,7 +41,8 @@ export class KeywordService {
                     cameFrom
                 );
 
-            if (keywordsOfUser.length + keywords.length >= 5) {
+            if (keywordsOfUser.length + keywords.length > 5) {
+                // TODO: define custom error
                 throw new Error(
                     'Total number of keyword can not larger than 5'
                 );
@@ -34,6 +50,7 @@ export class KeywordService {
 
             for (const existingKeyword of keywordsOfUser) {
                 if (keywords.includes(existingKeyword.keyword)) {
+                    // TODO: define custom error
                     throw new Error('Keyword duplication is not allowed');
                 }
             }
@@ -61,6 +78,22 @@ export class KeywordService {
     public async getAllKeywords() {
         try {
             return await this.keywordRepository.getAllKeywords();
+        } catch (e) {
+            throw e;
+        }
+    }
+
+    public async deleteKeywordByUserIdAndKeywordHash(
+        userId: string,
+        cameFrom: USER_CAME_FROM,
+        keywordHashes: string[]
+    ) {
+        try {
+            return await this.keywordRepository.deleteKeywordByUserIdAndKeywordHash(
+                userId,
+                keywordHashes,
+                cameFrom
+            );
         } catch (e) {
             throw e;
         }

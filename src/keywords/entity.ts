@@ -8,7 +8,9 @@ import {
 } from 'typeorm';
 import { User } from '../users/entity';
 
-@Entity()
+@Entity({
+    name: 'keyword',
+})
 @Index(['keywordHash'])
 export class Keyword {
     @PrimaryGeneratedColumn()
@@ -20,7 +22,11 @@ export class Keyword {
     @Column()
     keywordHash: string;
 
-    @ManyToMany(() => User, { cascade: true })
-    @JoinTable()
+    @ManyToMany(() => User, (user) => user.keywords, {
+        cascade: true,
+    })
+    @JoinTable({
+        name: 'keyword_user',
+    })
     users: User[];
 }

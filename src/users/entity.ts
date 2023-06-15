@@ -8,7 +8,9 @@ import {
 import { Keyword } from '../keywords/entity';
 import { USER_CAME_FROM } from './etc/USER_CAME_FROM';
 
-@Entity()
+@Entity({
+    name: 'user',
+})
 @Index(['userId'])
 export class User {
     @PrimaryGeneratedColumn()
@@ -20,6 +22,6 @@ export class User {
     @Column()
     cameFrom: USER_CAME_FROM;
 
-    @ManyToMany(() => Keyword)
+    @ManyToMany(() => Keyword, (keyword) => keyword.users)
     keywords: Keyword[];
 }

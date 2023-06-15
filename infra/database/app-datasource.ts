@@ -16,6 +16,7 @@ export class AppDataSource {
                     password: process.env.DATABASE_PASSWORD,
                     database: process.env.DATABASE_NAME,
                     synchronize: true,
+                    logging: true,
                     entities: [User, Keyword],
                     poolSize: 10,
                     connectTimeoutMS: 250,
