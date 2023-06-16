@@ -2,7 +2,7 @@ import { KeywordRepositoryInterface } from './interfaces/keyword-repository.inte
 import { KeywordDomain } from './domain/keyword';
 import { AppDataSource } from '../../infra/database/app-datasource';
 import { Keyword } from './entity';
-import { Repository } from 'typeorm';
+import { NotBrackets, Repository } from 'typeorm';
 import { User } from '../users/entity';
 import { USER_CAME_FROM } from '../users/etc/USER_CAME_FROM';
 
@@ -139,5 +139,45 @@ export class KeywordRepository implements KeywordRepositoryInterface {
         } catch (e) {
             throw e;
         }
+    }
+
+    public async deleteKeywordByUserIdAndKeywordHash(
+        userId: string,
+        keywordHashes: string[],
+        cameFrom: USER_CAME_FROM
+    ) {
+        const userEntity = await this.userRepositoryTypeORM
+            .createQueryBuilder('users')
+            .leftJoinAndSelect('users.keywords', 'keywords')
+            .where('users.userId = :userId', { userId })
+            .andWhere('users.cameFrom = :cameFrom', { cameFrom })
+            .getOneOrFail();
+
+        userEntity.keywords = userEntity.keywords.filter(
+            (keyword) => !keywordHashes.includes(keyword.keywordHash)
+        );
+
+        const updateResult = await this.userRepositoryTypeORM.save(userEntity);
+
+        // delete a user from table if this user has no subscribed keyword
+        if (updateResult.keywords.length === 0) {
+            await this.userRepositoryTypeORM
+                .createQueryBuilder('users')
+                .delete()
+                .from(User)
+                .where('userId = :userId', {
+                    userId: updateResult.userId,
+                })
+                .execute();
+        }
+
+        // delete all keywords which no user subscribed using raw query
+        await this.keywordRepositoryTypeORM.query(
+            `DELETE FROM keyword WHERE NOT EXISTS (SELECT 1 FROM keyword_user WHERE keyword_user."keywordId" = keyword.id);`
+        );
+
+        return updateResult.keywords.map<KeywordDomain>((keyword) => {
+            return KeywordDomain.fromTypeORMWithoutUser(keyword);
+        });
     }
 }
