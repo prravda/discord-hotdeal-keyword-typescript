@@ -3,7 +3,6 @@ import 'dotenv/config';
 import { AppDataSource } from './infra/database/app-datasource';
 import { KeywordRepository } from './src/keywords/repository';
 import { KeywordService } from './src/keywords/service';
-import { USER_CAME_FROM } from './src/users/etc/USER_CAME_FROM';
 import { DiscordEntryPoint } from './src/discord/entrypoint';
 import { CommandManager } from './src/discord/command-manager';
 import { ClientInstance } from './src/discord/client';

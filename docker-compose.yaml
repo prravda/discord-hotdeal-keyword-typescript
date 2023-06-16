@@ -15,6 +15,9 @@ services:
     depends_on:
       database-postgres:
         condition: service_healthy
+    networks:
+      - hotdeal-service
+
 
   database-postgres:
     hostname: database-postgres
@@ -34,12 +37,13 @@ services:
       retries: 10
     volumes:
       - database:/var/lib/postgresql/data
+    networks:
+      - hotdeal-service
 
 volumes:
   database:
 
-
-
-
-
-      
+networks:
+  hotdeal-service:
+    name: hotdeal-service
+    external: true
