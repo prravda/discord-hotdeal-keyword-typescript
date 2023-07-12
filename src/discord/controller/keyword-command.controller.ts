@@ -166,7 +166,7 @@ export class KeywordCommandController {
     ) {
         const userId = interaction.user.id;
         const deleteResult =
-            await this.keywordService.deleteKeywordByUserIdAndKeywordHash(
+            await this.keywordService.deleteKeywordByUserIdAndKeywordHashes(
                 userId,
                 USER_CAME_FROM.DISCORD,
                 keywordHashes

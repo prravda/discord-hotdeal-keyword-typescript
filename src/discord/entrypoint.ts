@@ -82,13 +82,10 @@ export class DiscordEntryPoint {
                         interaction.isStringSelectMenu() &&
                         interaction.customId === 'keyword-view-modal-for-delete'
                     ) {
-                        const keywordToDelete = interaction.values.filter(
-                            (keywordOrEmptyString) =>
-                                keywordOrEmptyString !== ''
-                        );
+                        const keywordHashesToDelete = interaction.values;
 
                         await this.keywordCommandController.deleteKeywordWithUserId(
-                            keywordToDelete,
+                            keywordHashesToDelete,
                             interaction
                         );
                     }

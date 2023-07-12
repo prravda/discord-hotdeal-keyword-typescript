@@ -2,9 +2,11 @@ import { KeywordRepositoryInterface } from './interfaces/keyword-repository.inte
 import { KeywordDomain } from './domain/keyword';
 import { AppDataSource } from '../../infra/database/app-datasource';
 import { Keyword } from './entity';
-import { NotBrackets, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../users/entity';
 import { USER_CAME_FROM } from '../users/etc/USER_CAME_FROM';
+import { createHash } from '../../infra/helpers';
+import { redisConnection } from '../../infra/cache/cache-redis';
 
 export class KeywordRepository implements KeywordRepositoryInterface {
     private keywordRepositoryTypeORM: Repository<Keyword>;
@@ -75,7 +77,7 @@ export class KeywordRepository implements KeywordRepositoryInterface {
                 const keywordInDatabase = await this.keywordRepositoryTypeORM
                     .createQueryBuilder('keywords')
                     .where('keywords.keywordHash = :keywordHash', {
-                        keywordHash: keyword,
+                        keywordHash: createHash(keyword),
                     })
                     .leftJoinAndSelect('keywords.users', 'users')
                     .getOne();
@@ -92,7 +94,7 @@ export class KeywordRepository implements KeywordRepositoryInterface {
 
                 const keywordTypeOrmEntity = new Keyword();
                 keywordTypeOrmEntity.keyword = keyword;
-                keywordTypeOrmEntity.keywordHash = keyword;
+                keywordTypeOrmEntity.keywordHash = createHash(keyword);
                 if (userInDatabase) {
                     keywordTypeOrmEntity.users = [userInDatabase];
                 }
@@ -105,9 +107,24 @@ export class KeywordRepository implements KeywordRepositoryInterface {
             keywordEntities
         );
 
-        return result.map<KeywordDomain>((res) =>
+        const parsedToDomainObject = result.map<KeywordDomain>((res) =>
             KeywordDomain.fromTypeORM(res)
         );
+
+        await Promise.all(
+            parsedToDomainObject.map((keyword) => {
+                return redisConnection.hset(
+                    `${userId}-${keyword.keywordHash}`,
+                    {
+                        userId,
+                        cameFrom,
+                        keyword: keyword.keyword,
+                    }
+                );
+            })
+        );
+
+        return parsedToDomainObject;
     }
 
     public async getAllKeywordsAndUsers(): Promise<KeywordDomain[]> {
@@ -141,7 +158,7 @@ export class KeywordRepository implements KeywordRepositoryInterface {
         }
     }
 
-    public async deleteKeywordByUserIdAndKeywordHash(
+    public async deleteKeywordByUserIdAndKeywordHashes(
         userId: string,
         keywordHashes: string[],
         cameFrom: USER_CAME_FROM
@@ -170,6 +187,12 @@ export class KeywordRepository implements KeywordRepositoryInterface {
                 })
                 .execute();
         }
+
+        await Promise.all(
+            keywordHashes.map((kw) => {
+                return redisConnection.del(`${userId}-${kw}`);
+            })
+        );
 
         // delete all keywords which no user subscribed using raw query
         await this.keywordRepositoryTypeORM.query(

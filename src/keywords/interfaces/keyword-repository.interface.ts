@@ -14,7 +14,7 @@ export interface KeywordRepositoryInterface {
         userId: string,
         cameFrom: USER_CAME_FROM
     ): Promise<KeywordDomain[]>;
-    deleteKeywordByUserIdAndKeywordHash(
+    deleteKeywordByUserIdAndKeywordHashes(
         userId: string,
         keywordHashes: string[],
         cameFrom: USER_CAME_FROM

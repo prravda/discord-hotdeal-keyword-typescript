@@ -83,13 +83,13 @@ export class KeywordService {
         }
     }
 
-    public async deleteKeywordByUserIdAndKeywordHash(
+    public async deleteKeywordByUserIdAndKeywordHashes(
         userId: string,
         cameFrom: USER_CAME_FROM,
         keywordHashes: string[]
     ) {
         try {
-            return await this.keywordRepository.deleteKeywordByUserIdAndKeywordHash(
+            return await this.keywordRepository.deleteKeywordByUserIdAndKeywordHashes(
                 userId,
                 keywordHashes,
                 cameFrom
