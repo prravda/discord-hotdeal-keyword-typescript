@@ -1,6 +1,7 @@
 import { DataSource } from 'typeorm';
 import { User } from '../../src/users/entity';
 import { Keyword } from '../../src/keywords/entity';
+import { ENV_LIST } from '../env-config';
 
 export class AppDataSource {
     private static appDataSource: DataSource;
@@ -12,9 +13,9 @@ export class AppDataSource {
                     type: 'postgres',
                     host: 'database-postgres',
                     port: 5432,
-                    username: process.env.DATABASE_USER,
-                    password: process.env.DATABASE_PASSWORD,
-                    database: process.env.DATABASE_NAME,
+                    username: ENV_LIST.DATABASE_USER,
+                    password: ENV_LIST.DATABASE_PASSWORD,
+                    database: ENV_LIST.DATABASE_NAME,
                     synchronize: true,
                     logging: true,
                     entities: [User, Keyword],

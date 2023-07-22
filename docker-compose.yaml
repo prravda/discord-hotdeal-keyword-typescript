@@ -2,8 +2,9 @@ version: "3.9"
 
 services:
   discord-app:
-    hostname: discord-app
-    container_name: discord-app
+    hostname: keyword-manager
+    container_name: keyword-manager
+    image: keyword-manager:1.0.0
     build:
       context: .
       dockerfile: Dockerfile

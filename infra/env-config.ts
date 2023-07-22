@@ -2,6 +2,12 @@ import 'dotenv/config';
 import Joi from 'joi';
 
 const envListSchema = Joi.object({
+    DATABASE_USER: Joi.string().required().description('database username'),
+    DATABASE_PASSWORD: Joi.string().required().description('database password'),
+    DATABASE_NAME: Joi.string().required().description('database table name'),
+
+    REDIS_PASSWORD: Joi.string().required().description('redis password'),
+
     DISCORD_TOKEN: Joi.string()
         .required()
         .description('discord bot application token'),
@@ -35,6 +41,12 @@ const validateEnvList = () => {
 const afterValidate = validateEnvList();
 
 export const ENV_LIST = {
+    DATABASE_USER: afterValidate.DATABASE_USER as string,
+    DATABASE_PASSWORD: afterValidate.DATABASE_PASSWORD as string,
+    DATABASE_NAME: afterValidate.DATABASE_NAME as string,
+
+    REDIS_PASSWORD: afterValidate.REDIS_PASSWORD as string,
+
     DISCORD_TOKEN: afterValidate.DISCORD_TOKEN as string,
     DISCORD_API_VERSION: afterValidate.DISCORD_API_VERSION as string,
     DISCORD_APPLICATION_ID: afterValidate.DISCORD_APPLICATION_ID as string,
