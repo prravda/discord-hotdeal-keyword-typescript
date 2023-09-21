@@ -1,9 +1,11 @@
 import { KeywordRepositoryInterface } from './interfaces/keyword-repository.interface';
 import { USER_CAME_FROM } from '../users/etc/USER_CAME_FROM';
+import { KeywordSearchRepositoryInterface } from '../keyword-search/interfaces/keyword-search.repository.interface';
 
 export class KeywordService {
     constructor(
-        private readonly keywordRepository: KeywordRepositoryInterface
+        private readonly keywordRepository: KeywordRepositoryInterface,
+        private readonly keywordSearchRepository: KeywordSearchRepositoryInterface
     ) {}
 
     public async getKeywordByUserIdAndSource(
@@ -55,11 +57,16 @@ export class KeywordService {
                 }
             }
 
-            return await this.keywordRepository.insertKeywordsWithUserId(
-                userId,
-                keywords,
-                cameFrom
-            );
+            const result =
+                await this.keywordRepository.insertKeywordsWithUserId(
+                    userId,
+                    keywords,
+                    cameFrom
+                );
+
+            await this.keywordSearchRepository.insertKeywords(keywords);
+
+            return result;
         } catch (e) {
             throw e;
         }
@@ -89,11 +96,20 @@ export class KeywordService {
         keywordHashes: string[]
     ) {
         try {
-            return await this.keywordRepository.deleteKeywordByUserIdAndKeywordHashes(
-                userId,
-                keywordHashes,
-                cameFrom
+            const result =
+                await this.keywordRepository.deleteKeywordByUserIdAndKeywordHashes(
+                    userId,
+                    keywordHashes,
+                    cameFrom
+                );
+
+            const rawKeywordList = result.map<string>(
+                (eachKeywordDomainObject) => eachKeywordDomainObject.keyword
             );
+
+            await this.keywordSearchRepository.deleteKeywords(rawKeywordList);
+
+            return result;
         } catch (e) {
             throw e;
         }

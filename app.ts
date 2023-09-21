@@ -1,13 +1,12 @@
 import 'reflect-metadata';
 import 'dotenv/config';
 import { AppDataSource } from './infra/database/app-datasource';
-import { KeywordRepository } from './src/keywords/repository';
-import { KeywordService } from './src/keywords/service';
 import { DiscordEntryPoint } from './src/discord/entrypoint';
 import { CommandManager } from './src/discord/command-manager';
 import { ClientInstance } from './src/discord/client';
 import { KeywordCommand } from './src/discord/slash/keyword';
 import { KeywordCommandController } from './src/discord/controller/keyword-command.controller';
+import { ServiceInstance } from './src/keywords/service-instance';
 
 const bootstrap = async () => {
     try {
@@ -17,9 +16,7 @@ const bootstrap = async () => {
         // init discord application
         const slashCommands = [KeywordCommand];
         const discordApp = new DiscordEntryPoint(
-            new KeywordCommandController(
-                new KeywordService(new KeywordRepository())
-            ),
+            new KeywordCommandController(ServiceInstance.getService()),
             new CommandManager(slashCommands),
             ClientInstance.getClient()
         );
