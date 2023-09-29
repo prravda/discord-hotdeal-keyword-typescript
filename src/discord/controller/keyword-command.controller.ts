@@ -29,9 +29,9 @@ export class KeywordCommandController {
         }
 
         await interaction.reply(
-            `${keywordsOfUser.map(
-                (keyword) => `${keyword.keyword} `
-            )} 를 등록하셨습니다.`
+            `${keywordsOfUser
+                .map((keyword) => `${keyword.keyword}`)
+                .join(', ')} 를 등록하셨습니다.`
         );
     }
 
@@ -39,7 +39,7 @@ export class KeywordCommandController {
         const keywordInputModal = new TextInputBuilder()
             .setRequired(false)
             .setCustomId(`asking-keywords-${sequence}`)
-            .setLabel('알림을 받길 원하는 키워드를 입력해주세요.')
+            .setLabel('각 키워드는 16자를 넘을 수 없습니다.')
             .setStyle(TextInputStyle.Short);
         return new ActionRowBuilder().addComponents(keywordInputModal);
     }
@@ -126,6 +126,13 @@ export class KeywordCommandController {
                 return;
             }
 
+            if (keywords.some((keyword) => keyword.length > 16)) {
+                await interaction.reply(
+                    '키워드의 길이는 16자를 넘을 수 없습니다.'
+                );
+                return;
+            }
+
             if (new Set(keywords).size !== keywords.length) {
                 await interaction.reply(
                     '키워드에 중복이 있습니다. 다시 한 번 확인해주세요'
@@ -143,9 +150,9 @@ export class KeywordCommandController {
 
             if (insertResult) {
                 await interaction.reply(
-                    `입력한 키워드 ${keywords.map(
-                        (kw) => `${kw} `
-                    )} 의 등록이 완료되었습니다.`
+                    `입력한 키워드 ${keywords
+                        .map((kw) => `${kw}`)
+                        .join(', ')} 의 등록이 완료되었습니다.`
                 );
             }
         } catch (e) {

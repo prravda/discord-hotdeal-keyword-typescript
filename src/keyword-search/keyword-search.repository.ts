@@ -1,6 +1,6 @@
 import { Cluster } from 'ioredis';
 import { KeywordSearchRepositoryInterface } from './interfaces/keyword-search.repository.interface';
-import { KeywordSearchMachine } from './trie';
+import { TyniSearch } from 'tynisearch';
 
 export class KeywordSearchRepository
     implements KeywordSearchRepositoryInterface
@@ -14,35 +14,32 @@ export class KeywordSearchRepository
 
             // if trie on 'keywords' does not exist, create a new one and set it
             if (!serializedTrieFromMaster) {
-                const emptyTrieForInit = new KeywordSearchMachine();
+                const emptyTrieForInit = new TyniSearch();
 
-                const serializedEmptyTrie = JSON.stringify(
-                    emptyTrieForInit.toJSON()
-                );
+                const serializedEmptyTrie = emptyTrieForInit.serialize();
                 await masterNode.set('keywords', serializedEmptyTrie);
 
                 return serializedEmptyTrie;
             }
 
-            // if trie on 'keywords' exists, just return it
             return serializedTrieFromMaster;
         } catch (e) {
             throw e;
         }
     }
 
-    private async getParsedTrie(): Promise<KeywordSearchMachine> {
+    private async getParsedTrie(): Promise<TyniSearch> {
         try {
             const serializedTrie = await this.getSerializedTrieFromMasterNode();
-            return KeywordSearchMachine.fromJSON(JSON.parse(serializedTrie));
+            return TyniSearch.deserialize(serializedTrie);
         } catch (e) {
             throw e;
         }
     }
 
-    private async updateTrie(updatedTrie: KeywordSearchMachine): Promise<void> {
+    private async updateTrie(updatedTrie: TyniSearch): Promise<void> {
         try {
-            const serializedTrie = JSON.stringify(updatedTrie.toJSON());
+            const serializedTrie = updatedTrie.serialize();
             await this.keywordSearchCluster.set('keywords', serializedTrie);
         } catch (e) {
             throw e;
@@ -52,7 +49,7 @@ export class KeywordSearchRepository
     public async insertKeywords(keywordList: string[]): Promise<void> {
         try {
             const trie = await this.getParsedTrie();
-            keywordList.forEach((keyword) => trie.insert(keyword));
+            trie.insert(keywordList);
             await this.updateTrie(trie);
         } catch (e) {
             throw e;
@@ -61,7 +58,7 @@ export class KeywordSearchRepository
 
     public async deleteKeywords(keywordList: string[]): Promise<void> {
         const trie = await this.getParsedTrie();
-        keywordList.forEach((keyword) => trie.delete(keyword));
+        trie.delete(keywordList);
         await this.updateTrie(trie);
     }
 }
