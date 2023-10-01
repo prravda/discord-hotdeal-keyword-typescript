@@ -4,7 +4,7 @@ services:
   discord-app:
     hostname: keyword-manager
     container_name: keyword-manager
-    image: keyword-manager:1.0.1
+    image: keyword-manager:1.0.2
     build:
       context: .
       dockerfile: Dockerfile
